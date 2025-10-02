@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <title>Pet Store</title>
+</head>
+<body>
+  <div id="webstore">
+    <h1>{{ message }}</h1>
+
+    <!-- Navigation -->
+    <button v-on:click="showProductList">
+      <i class="fa-solid fa-store"></i> Product List
+    </button>
+
+    <button v-on:click="showCheckout">
+      <i class="fa-solid fa-cart-shopping"></i> Cart ({{ cart.length }})
+    </button>
+
+    <!-- Product List -->
+    <div v-if="showProduct">
+      <div v-for="product in products" :key="product.id">
+        <img v-bind:src="product.image" width="100">
+        <h3>{{ product.title }}</h3>
+        <p>{{ product.description }}</p>
+        <p>Price: Rs {{ product.price }}</p>
+        <p>Available: {{ product.available }}</p>
+
+        <!-- Add to cart button -->
+        <button v-on:click="addToCart(product)" :disabled="product.available === 0">
+          <i class="fa-solid fa-cart-plus"></i>
+          {{ product.available > 0 ? 'Add to Cart' : 'Out of Stock' }}
+        </button>
+        <hr>
+      </div>
+    </div>
+
+    <!-- Checkout Page -->
+    <div v-if="showCheckoutPage">
+      <h2>CHECKOUT!!!</h2>
+      <div v-if="cart.length > 0">
+        <ul>
+          <li v-for="item in cart" :key="item.id">
+            {{ item.title }} - Rs {{ item.price }}
+          </li>
+        </ul>
+        <p>Total: Rs {{ cartTotal }}</p>
+        <button v-on:click="emptyCart">
+          <i class="fa-solid fa-trash"></i> Empty Cart
+        </button>
+      </div>
+      <p v-else>Your cart is empty.</p>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#webstore',
+      data: {
+        message: 'Welcome to my Pet Store!',
+        showProduct: true,
+        showCheckoutPage: false,
+        products: [
+          { id: 1, title: 'Cat Food', description: 'Tasty food for cats', price: 2000, image: 'images/product-fullsize.png', available: 5 },
+          { id: 2, title: 'Dog Toy', description: 'Fun toy for dogs', price: 500, image: 'images/dog-toy.png', available: 3 }
+        ],
+        cart: []
+      },
+      computed: {
+        cartTotal() {
+          return this.cart.reduce((sum, item) => sum + item.price, 0);
+        }
+      },
+      methods: {
+        addToCart(product) {
+          if (product.available > 0) {
+            this.cart.push(product);
+            product.available--;
+          }
+        },
+        emptyCart() {
+          this.cart.forEach(item => {
+            let prod = this.products.find(p => p.id === item.id);
+            if (prod) prod.available++;
+          });
+          this.cart = [];
+        },
+        showProductList() {
+          this.showProduct = true;
+          this.showCheckoutPage = false;
+        },
+        showCheckout() {
+          this.showProduct = false;
+          this.showCheckoutPage = true;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
